@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="midnight">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURA // Next-Gen Productivity & Focus OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="icon" href="icon.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    
+  </style>
+
+</head>
+<body>
+  <!-- Canvas for Confetti Particle FX -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="app-layout">
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">AURA</span>
+            <span class="brand-tag">Focus OS</span>
+          </div>
+        </div>
+
+        <nav class="view-switcher" role="tablist">
+          <button class="view-tab active" data-view="list" id="tab-list" title="List View (Alt+1)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            <span>List</span>
+          </button>
+          <button class="view-tab" data-view="kanban" id="tab-kanban" title="Kanban Board (Alt+2)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"></rect><rect x="10" y="3" width="5" height="12" rx="1"></rect><rect x="17" y="3" width="5" height="15" rx="1"></rect></svg>
+            <span>Kanban</span>
+          </button>
+          <button class="view-tab" data-view="matrix" id="tab-matrix" title="Eisenhower Matrix (Alt+3)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="1"></rect><rect x="13" y="3" width="8" height="8" rx="1"></rect><rect x="3" y="13" width="8" height="8" rx="1"></rect><rect x="13" y="13" width="8" height="8" rx="1"></rect></svg>
+            <span>Matrix</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="header-center">
+        <button class="command-trigger" id="cmd-palette-btn" title="Open Command Palette (Ctrl+K)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span class="cmd-text">Quick actions & search...</span>
+          <kbd class="shortcut-pill">Ctrl K</kbd>
+        </button>
+      </div>
+
+      <div class="header-right">
+        <!-- Gamification XP / Level Pill -->
+        <div class="user-stats-pill" id="user-stats-pill" title="Click to view Flow State & XP details">
+          <div class="streak-badge" id="streak-badge">
+            <span class="fire-icon">🔥</span>
+            <span id="streak-count">1</span>d
+          </div>
+          <div class="xp-progress-wrap">
+            <div class="level-indicator">
+              <span id="level-title">Lv. 1</span>
+              <span class="rank-name" id="rank-name">Flow Adept</span>
+            </div>
+            <div class="xp-bar-bg">
+              <div class="xp-bar-fill" id="xp-bar-fill" style="width: 65%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ambient Sound Toggle -->
+        <button class="icon-action-btn" id="ambient-sound-btn" title="Ambient Focus Soundscape (Rain & White Noise)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+          <span class="pulse-dot" id="sound-pulse"></span>
+        </button>
+
+        <!-- Focus Timer Launcher -->
+        <button class="icon-action-btn" id="focus-modal-btn" title="Pomodoro & Focus Timer (F)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </button>
+
+        <!-- Audio FX Mute/Unmute Toggle -->
+        <button class="icon-action-btn" id="sound-effects-btn" title="Toggle UI Sounds (M)">
+          <svg id="sfx-icon-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <svg id="sfx-icon-off" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+        </button>
+
+        <!-- Theme Picker Dropdown -->
+        <div class="dropdown-wrap">
+          <button class="icon-action-btn" id="theme-btn" title="Change Theme Palette">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+          </button>
+          <div class="theme-dropdown-menu hidden" id="theme-menu">
+            <div class="dropdown-header">Color Atmosphere</div>
+            <button class="theme-opt active" data-theme="midnight">
+              <span class="theme-dot dot-midnight"></span> Midnight Obsidian
+            </button>
+            <button class="theme-opt" data-theme="cyberpunk">
+              <span class="theme-dot dot-cyber"></span> Cyber Neon
+            </button>
+            <button class="theme-opt" data-theme="aurora">
+              <span class="theme-dot dot-aurora"></span> Violet Aurora
+            </button>
+            <button class="theme-opt" data-theme="emerald">
+              <span class="theme-dot dot-emerald"></span> Matrix Emerald
+            </button>
+          </div>
+        </div>
+
+        <!-- Help / Shortcuts -->
+        <button class="icon-action-btn" id="help-btn" title="Keyboard Shortcuts (?)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- App Main Body -->
+    <main class="app-main">
+      <h1 class="sr-only">AURA To-Do App</h1>
+      <div class="content-container">
+
+        <!-- Smart Quick Capture Bar -->
+        <section class="quick-capture-section">
+          <h2 class="sr-only">Quick Capture</h2>
+          <div class="capture-card">
+            <div class="input-line">
+              <div class="input-sparkle">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path><path d="M17 4a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2z"></path></svg>
+              </div>
+              <input 
+                type="text" 
+                id="task-quick-input" 
+                placeholder="Capture task... Type #tag, !high, @today, ⚡deep, ~25m (Press Enter to Add)" 
+                autocomplete="off"
+              >
+              <button class="add-task-btn" id="add-task-btn" title="Add Task (Enter)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Add Task</span>
+              </button>
+            </div>
+
+            <!-- NLP Live Preview Chips & Quick Pickers -->
+            <div class="capture-meta-row" >
+              <div class="meta-pickers">
+                <!-- Priority Selector -->
+                <div class="quick-pill-select" id="pill-priority" title="Select Priority">
+                  <span class="pill-icon">🚩</span>
+                  <select id="quick-priority-select" >
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority (!high)</option>
+                    <option value="urgent">Urgent (!urgent)</option>
+                    <option value="low">Low Priority (!low)</option>
+                  </select>
+                </div>
+
+                <!-- Energy Level Selector -->
+                <div class="quick-pill-select" id="pill-energy" title="Required Energy Level">
+                  <span class="pill-icon">⚡</span>
+                  <select id="quick-energy-select">
+                    <option value="medium">⚡ Medium Energy</option>
+                    <option value="high">⚡⚡ High Intensity</option>
+                    <option value="deep">🧘 Deep Focus</option>
+                    <option value="low">☕ Low Energy</option>
+                  </select>
+                </div>
+
+                <!-- Due Date Input -->
+                <div class="quick-pill-input" id="pill-due" title="Target Date">
+                  <span class="pill-icon">📅</span>
+                  <input type="date" id="quick-due-date">
+                </div>
+
+                <!-- Tag / Category Input -->
+                <div class="quick-pill-input" id="pill-tag" title="Category / Project Tag">
+                  <span class="pill-icon">🏷️</span>
+                  <input type="text" id="quick-tag-input" placeholder="Tag (e.g. Work, Code)">
+                </div>
+
+                <!-- Estimated Pomodoro Duration -->
+                <div class="quick-pill-select" id="pill-estimate" title="Estimated Time">
+                  <span class="pill-icon">⏱️</span>
+                  <select id="quick-est-select">
+                    <option value="25">25 mins (~1 pomo)</option>
+                    <option value="15">15 mins</option>
+                    <option value="45">45 mins</option>
+                    <option value="60">60 mins</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- NLP Live Extracted Tag Preview -->
+              <div class="nlp-tags-preview" id="nlp-preview-tags"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Filter & Control Toolbar -->
+        <section class="toolbar-section">
+          <h2 class="sr-only">Task Filters and Controls</h2>
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="filter-search-input" placeholder="Search tasks, tags, notes... (/)">
+            <button class="clear-search-btn hidden" id="clear-search-btn" title="Clear Search">✕</button>
+          </div>
+
+          <!-- Energy Filter Chips -->
+          <div class="filter-chips-scroll">
+            <button class="filter-chip active" data-filter="all">All</button>
+            <button class="filter-chip" data-filter="today">Today</button>
+            <button class="filter-chip" data-filter="upcoming">Upcoming</button>
+            <button class="filter-chip" data-filter="starred">⭐ Starred</button>
+            <div class="chip-divider"></div>
+            <button class="filter-chip energy-filter" data-energy="all">⚡ Any Energy</button>
+            <button class="filter-chip energy-filter" data-energy="deep" title="Requires deep uninterrupted focus">🧘 Deep Focus</button>
+            <button class="filter-chip energy-filter" data-energy="high" title="Requires active high energy">⚡ High Energy</button>
+            <button class="filter-chip energy-filter" data-energy="low" title="Easy wins when tired">☕ Low Energy</button>
+          </div>
+
+          <!-- Sort and Clean Actions -->
+          <div class="toolbar-actions">
+            <div class="sort-selector-wrap">
+              <span class="sort-label">Sort:</span>
+              <select id="sort-select">
+                <option value="due-asc">Due Date</option>
+                <option value="priority-desc">Priority</option>
+                <option value="created-desc">Newest First</option>
+                <option value="title-asc">Alphabetical</option>
+              </select>
+            </div>
+
+            <button class="subtle-btn" id="clear-completed-btn" title="Archive completed tasks">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Clean Done</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Stats Overview Banner -->
+        <section class="stats-banner">
+          <h2 class="sr-only">Task Statistics</h2>
+          <div class="stat-card">
+            <div class="stat-val" id="stat-total">0</div>
+            <div class="stat-label">Total Tasks</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val text-primary" id="stat-pending">0</div>
+            <div class="stat-label">In Orbit</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val text-success" id="stat-completed">0</div>
+            <div class="stat-label">Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val text-accent" id="stat-pomo-time">0m</div>
+            <div class="stat-label">Focus Logged</div>
+          </div>
+          <div class="stat-progress-card">
+            <div class="stat-progress-header">
+              <span>Daily Velocity</span>
+              <span id="stat-completion-pct">0%</span>
+            </div>
+            <div class="stat-progress-bar">
+              <div class="stat-progress-fill" id="stat-progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 1: LIST VIEW -->
+        <!-- ============================================== -->
+        <section class="view-panel active" id="view-list">
+          <!-- Overdue & Today Section -->
+          <div class="task-group" id="group-today-wrapper">
+            <div class="group-header">
+              <div class="group-title">
+                <span class="group-indicator indicator-urgent"></span>
+                <h3>Today & Active Focus</h3>
+                <span class="group-count" id="count-today">0</span>
+              </div>
+            </div>
+            <div class="tasks-container" id="tasks-today-list"></div>
+          </div>
+
+          <!-- Upcoming Section -->
+          <div class="task-group" id="group-upcoming-wrapper">
+            <div class="group-header">
+              <div class="group-title">
+                <span class="group-indicator indicator-upcoming"></span>
+                <h3>Upcoming Horizons</h3>
+                <span class="group-count" id="count-upcoming">0</span>
+              </div>
+            </div>
+            <div class="tasks-container" id="tasks-upcoming-list"></div>
+          </div>
+
+          <!-- Someday & Backlog Section -->
+          <div class="task-group" id="group-backlog-wrapper">
+            <div class="group-header">
+              <div class="group-title">
+                <span class="group-indicator indicator-backlog"></span>
+                <h3>Backlog & Ideas</h3>
+                <span class="group-count" id="count-backlog">0</span>
+              </div>
+            </div>
+            <div class="tasks-container" id="tasks-backlog-list"></div>
+          </div>
+
+          <!-- Completed Section (Collapsible) -->
+          <div class="task-group completed-group" id="group-completed-wrapper">
+            <div class="group-header clickable" id="toggle-completed-group">
+              <div class="group-title">
+                <span class="group-indicator indicator-done"></span>
+                <h3>Completed Quests</h3>
+                <span class="group-count" id="count-completed">0</span>
+              </div>
+              <div class="collapse-icon" id="completed-collapse-arrow">▼</div>
+            </div>
+            <div class="tasks-container" id="tasks-completed-list"></div>
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state hidden" id="list-empty-state">
+            <div class="empty-glow"></div>
+            <div class="empty-icon">✨</div>
+            <h3>Zero Task Gravity</h3>
+            <p>You have conquered all pending missions. Press <kbd>N</kbd> or type above to embark on a new quest.</p>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 2: KANBAN BOARD -->
+        <!-- ============================================== -->
+        <section class="view-panel" id="view-kanban">
+          <div class="kanban-grid">
+            <!-- Column 1: Backlog -->
+            <div class="kanban-col" data-col="backlog" id="kcol-backlog">
+              <div class="col-header">
+                <div class="col-title">
+                  <span class="col-dot dot-gray"></span>
+                  <h4>Backlog</h4>
+                </div>
+                <span class="col-count" id="kcount-backlog">0</span>
+              </div>
+              <div class="kanban-dropzone" data-status="backlog" id="kzone-backlog"></div>
+            </div>
+
+            <!-- Column 2: In Progress -->
+            <div class="kanban-col" data-col="in-progress" id="kcol-in-progress">
+              <div class="col-header">
+                <div class="col-title">
+                  <span class="col-dot dot-cyan"></span>
+                  <h4>In Orbit</h4>
+                </div>
+                <span class="col-count" id="kcount-in-progress">0</span>
+              </div>
+              <div class="kanban-dropzone" data-status="in-progress" id="kzone-in-progress"></div>
+            </div>
+
+            <!-- Column 3: Review / Waiting -->
+            <div class="kanban-col" data-col="review" id="kcol-review">
+              <div class="col-header">
+                <div class="col-title">
+                  <span class="col-dot dot-amber"></span>
+                  <h4>Pending Review</h4>
+                </div>
+                <span class="col-count" id="kcount-review">0</span>
+              </div>
+              <div class="kanban-dropzone" data-status="review" id="kzone-review"></div>
+            </div>
+
+            <!-- Column 4: Completed -->
+            <div class="kanban-col" data-col="completed" id="kcol-completed">
+              <div class="col-header">
+                <div class="col-title">
+                  <span class="col-dot dot-emerald"></span>
+                  <h4>Conquered</h4>
+                </div>
+                <span class="col-count" id="kcount-completed">0</span>
+              </div>
+              <div class="kanban-dropzone" data-status="completed" id="kzone-completed"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW 3: EISENHOWER MATRIX -->
+        <!-- ============================================== -->
+        <section class="view-panel" id="view-matrix">
+          <h2 class="sr-only">Eisenhower Matrix</h2>
+          <div class="matrix-grid">
+            <!-- Q1: Urgent & Important -->
+            <div class="matrix-cell q1-cell" data-quadrant="q1">
+              <div class="matrix-cell-header">
+                <div class="q-badge q1-badge">Q1: DO NOW</div>
+                <div class="q-desc">Urgent & Important (Crisis / Deadlines)</div>
+                <span class="q-count" id="q1-count">0</span>
+              </div>
+              <div class="matrix-dropzone" id="matrix-zone-q1" data-quadrant="q1"></div>
+            </div>
+
+            <!-- Q2: Not Urgent, but Important -->
+            <div class="matrix-cell q2-cell" data-quadrant="q2">
+              <div class="matrix-cell-header">
+                <div class="q-badge q2-badge">Q2: SCHEDULE</div>
+                <div class="q-desc">Important & Long-term Growth</div>
+                <span class="q-count" id="q2-count">0</span>
+              </div>
+              <div class="matrix-dropzone" id="matrix-zone-q2" data-quadrant="q2"></div>
+            </div>
+
+            <!-- Q3: Urgent, Not Important -->
+            <div class="matrix-cell q3-cell" data-quadrant="q3">
+              <div class="matrix-cell-header">
+                <div class="q-badge q3-badge">Q3: DELEGATE</div>
+                <div class="q-desc">Urgent, Low Impact / Interruptions</div>
+                <span class="q-count" id="q3-count">0</span>
+              </div>
+              <div class="matrix-dropzone" id="matrix-zone-q3" data-quadrant="q3"></div>
+            </div>
+
+            <!-- Q4: Neither Urgent Nor Important -->
+            <div class="matrix-cell q4-cell" data-quadrant="q4">
+              <div class="matrix-cell-header">
+                <div class="q-badge q4-badge">Q4: ELIMINATE</div>
+                <div class="q-desc">Time-Wasters / Optional Someday</div>
+                <span class="q-count" id="q4-count">0</span>
+              </div>
+              <div class="matrix-dropzone" id="matrix-zone-q4" data-quadrant="q4"></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- Bottom Status Bar -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <span class="status-indicator"></span>
+        <span class="footer-status-text">All systems synced to LocalStorage</span>
+        <span class="footer-sep">•</span>
+        <button class="footer-link-btn" id="backup-btn">Backup / Restore</button>
+      </div>
+      <div class="footer-right">
+        <span class="keyboard-tip">Tip: Press <kbd>/</kbd> to search, <kbd>N</kbd> for task, <kbd>F</kbd> for focus, <kbd>?</kbd> for shortcuts</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: FOCUS MODE / POMODORO TIMER -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop hidden" id="focus-modal">
+    <div class="modal-content focus-modal-box">
+      <button class="modal-close-btn" id="focus-close-btn">✕</button>
+
+      <div class="focus-header">
+        <span class="focus-pill">DEEP FLOW STATE</span>
+        <h2 id="focus-task-title">General Deep Work Session</h2>
+        <p class="focus-subtitle" id="focus-task-tag">Select or start your timer to lock into focus</p>
+      </div>
+
+      <!-- Circular Progress Countdown -->
+      <div class="focus-timer-visual">
+        <svg class="progress-ring" width="240" height="240">
+          <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.08)" stroke-width="8" fill="transparent" r="105" cx="120" cy="120"/>
+          <circle class="progress-ring-circle" id="timer-ring" stroke="var(--accent-primary)" stroke-width="8" stroke-dasharray="660" stroke-dashoffset="0" stroke-linecap="round" fill="transparent" r="105" cx="120" cy="120"/>
+        </svg>
+        <div class="timer-display">
+          <span class="time-readout" id="focus-time-display">25:00</span>
+          <span class="timer-mode-label" id="focus-mode-label">POMODORO FOCUS</span>
+        </div>
+      </div>
+
+      <!-- Preset Mode Tabs -->
+      <div class="timer-presets">
+        <button class="timer-preset-btn active" data-time="25" data-mode="Pomodoro">25m Pomodoro</button>
+        <button class="timer-preset-btn" data-time="50" data-mode="Deep Focus">50m Ultra</button>
+        <button class="timer-preset-btn" data-time="5" data-mode="Short Break">5m Break</button>
+        <button class="timer-preset-btn" data-time="15" data-mode="Long Break">15m Recharge</button>
+      </div>
+
+      <!-- Timer Controls -->
+      <div class="focus-controls">
+        <button class="focus-primary-btn" id="timer-toggle-btn">
+          <svg id="timer-play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <svg id="timer-pause-icon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          <span id="timer-btn-text">Start Focus Session</span>
+        </button>
+        <button class="focus-secondary-btn" id="timer-reset-btn" title="Reset Timer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+        </button>
+        <button class="focus-primary-btn1" id="timer-save-btn" type="button" title="Save elapsed focus time"  >Save Session</button>
+      </div>
+
+      <!-- Quick Ambient Sound within Focus Modal -->
+      <div class="focus-ambient-section">
+        <div class="ambient-controls-bar">
+          <span class="ambient-label">Ambient Sound:</span>
+          <div class="ambient-toggles">
+            <button class="ambient-track-btn active" data-track="off">Mute</button>
+            <button class="ambient-track-btn" data-track="rain">🌧️ Rain</button>
+            <button class="ambient-track-btn" data-track="whitenoise">💨 White Noise</button>
+            <button class="ambient-track-btn" data-track="binaural">🧘 432Hz Drone</button>
+          </div>
+        </div>
+        <div class="volume-slider-row">
+          <span>Vol</span>
+          <input type="range" id="ambient-volume" min="0" max="1" step="0.05" value="0.3">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: TASK DETAIL & SUBTASKS EDITOR -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop hidden" id="task-detail-modal">
+    <div class="modal-content detail-modal-box">
+      <button class="modal-close-btn" id="detail-close-btn">✕</button>
+
+      <div class="detail-header">
+        <input type="text" class="detail-title-input" id="detail-task-title" placeholder="Task title...">
+      </div>
+
+      <div class="detail-grid">
+        <!-- Left: Notes & Subtasks -->
+        <div class="detail-left-col">
+          <div class="detail-section">
+            <label class="detail-label">Notes & Context</label>
+            <textarea id="detail-task-notes" placeholder="Add detailed notes, markdown links, checklist context..."></textarea>
+          </div>
+
+          <!-- Subtasks breakdown -->
+          <div class="detail-section">
+            <div class="subtask-header-row">
+              <label class="detail-label">Subtask Milestones (<span id="subtasks-ratio">0/0</span>)</label>
+              <div class="subtask-mini-progress">
+                <div class="subtask-fill" id="subtask-bar-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="subtask-list" id="detail-subtasks-container"></div>
+
+            <div class="add-subtask-row">
+              <input type="text" id="new-subtask-input" placeholder="Add subtask milestone and press Enter...">
+              <button class="subtle-btn" id="add-subtask-btn">+ Add</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Metadata & Attributes -->
+        <div class="detail-right-col">
+          <div class="attr-group">
+            <label>Priority</label>
+            <select id="detail-priority-select">
+              <option value="urgent">🔴 Urgent (!urgent)</option>
+              <option value="high">🟠 High (!high)</option>
+              <option value="medium">🟡 Medium (!med)</option>
+              <option value="low">🟢 Low (!low)</option>
+            </select>
+          </div>
+
+          <div class="attr-group">
+            <label>Cognitive Energy</label>
+            <select id="detail-energy-select">
+              <option value="deep">🧘 Deep Focus</option>
+              <option value="high">⚡ High Intensity</option>
+              <option value="medium">⚡ Medium Effort</option>
+              <option value="low">☕ Low Energy</option>
+            </select>
+          </div>
+
+          <div class="attr-group">
+            <label>Kanban Status</label>
+            <select id="detail-status-select">
+              <option value="backlog">📋 Backlog</option>
+              <option value="in-progress">⚡ In Orbit</option>
+              <option value="review">🔍 In Review</option>
+              <option value="completed">✅ Conquered</option>
+            </select>
+          </div>
+
+          <div class="attr-group">
+            <label>Eisenhower Quadrant</label>
+            <select id="detail-quadrant-select">
+              <option value="q1">Q1: Urgent & Important</option>
+              <option value="q2">Q2: Important, Not Urgent</option>
+              <option value="q3">Q3: Urgent, Not Important</option>
+              <option value="q4">Q4: Not Urgent & Not Important</option>
+            </select>
+          </div>
+
+          <div class="attr-group">
+            <label>Target Due Date</label>
+            <input type="date" id="detail-due-date">
+          </div>
+
+          <div class="attr-group">
+            <label>Tag / Project</label>
+            <input type="text" id="detail-tag-input" placeholder="e.g. Work, Engineering">
+          </div>
+
+          <div class="detail-actions">
+            <button class="focus-btn-quick" id="detail-start-focus-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+              <span>Focus on this Task</span>
+            </button>
+            <button class="danger-btn" id="detail-delete-btn">Delete Mission</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-footer">
+        <span class="save-status" id="detail-save-indicator">Auto-saved</span>
+        <button class="primary-btn" id="detail-done-btn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: COMMAND PALETTE (Ctrl+K) -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop hidden" id="cmd-palette-modal">
+    <div class="cmd-palette-card">
+      <div class="cmd-input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="cmd-palette-input" placeholder="Type a command or search mission..." autocomplete="off">
+        <kbd class="esc-pill">Esc</kbd>
+      </div>
+
+      <div class="cmd-results" id="cmd-results-list">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div class="cmd-footer">
+        <span>Use <kbd>↑</kbd> <kbd>↓</kbd> to navigate, <kbd>Enter</kbd> to execute</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: KEYBOARD SHORTCUTS -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop hidden" id="shortcuts-modal">
+    <div class="modal-content shortcuts-modal-box">
+      <button class="modal-close-btn" id="shortcuts-close-btn">✕</button>
+      <h3>Keyboard Velocity Shortcuts</h3>
+      <div class="shortcuts-grid">
+        <div class="shortcut-item">
+          <span>Quick Capture Task</span>
+          <kbd>N</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Open Command Palette</span>
+          <kbd>Ctrl + K</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Search Tasks</span>
+          <kbd>/</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Pomodoro Focus Timer</span>
+          <kbd>F</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Switch to List View</span>
+          <kbd>Alt + 1</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Switch to Kanban View</span>
+          <kbd>Alt + 2</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Switch to Matrix View</span>
+          <kbd>Alt + 3</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Toggle Audio FX</span>
+          <kbd>M</kbd>
+        </div>
+        <div class="shortcut-item">
+          <span>Close Open Dialog / Cancel</span>
+          <kbd>Escape</kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: DATA BACKUP / EXPORT / IMPORT -->
+  <!-- ============================================== -->
+  <div class="modal-backdrop hidden" id="backup-modal">
+    <div class="modal-content backup-modal-box">
+      <button class="modal-close-btn" id="backup-close-btn">✕</button>
+      <h3>Data Portability & Vault</h3>
+      <p class="backup-desc">All your tasks, subtasks, XP, and focus logs live securely inside your browser's LocalStorage. You can export a snapshot JSON or restore one anytime.</p>
+
+      <div class="backup-actions-row">
+        <button class="primary-btn" id="export-json-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Export Backup (JSON)
+        </button>
+
+        <label class="file-import-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Import Backup
+          <input type="file" id="import-json-file" accept=".json" class="hidden">
+        </label>
+
+        <button class="danger-btn" id="reset-demo-btn">Load Demo Universe</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
